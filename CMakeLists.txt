@@ -7,9 +7,14 @@ SET( PROJ_OUT_PATH  ${CMAKE_BINARY_DIR} )
 SET( PROJ_SOURCES   "")
 SET( PROJ_HEADERS   "" )
 
-set(PYTHON_LIBRARY "C:/Users/AlbaRoger/AppData/Local/Programs/Python/Python35-32/libs")
-set(PYTHON_INCLUDE_DIR "C:/Users/AlbaRoger/AppData/Local/Programs/Python/Python35-32/include")
 
+
+
+#set(PYTHON_LIBRARY "C:/Users/AlbaRoger/AppData/Local/Programs/Python/Python35-32/libs")
+#set(PYTHON_INCLUDE_DIR "C:/Users/AlbaRoger/AppData/Local/Programs/Python/Python35-32/include")
+
+set(PYTHON_LIBRARY "/Library/Frameworks/Python.framework/Versions/3.5/lib/")
+set(PYTHON_INCLUDE_DIR "/Library/Frameworks/Python.framework/Versions/3.5/include/python3.5m/")
  
 ## include("${PROJ_PATH}/FindPythonLibs.cmake")
 
@@ -88,7 +93,10 @@ GroupSources(src)
  add_executable( ${PROJ_NAME} ${files} )
 
 LINK_DIRECTORIES("${PYTHON_LIBRARY}")
-target_link_libraries(${PROJ_NAME} "${PYTHON_LIBRARY}/python35.lib")
+#target_link_libraries(${PROJ_NAME} "${PYTHON_LIBRARY}/python35.lib")
+
+target_link_libraries(${PROJ_NAME} "${PYTHON_LIBRARY}/libpython3.5m.dylib")
+
 
 set_target_properties( ${PROJ_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/exe"  )
 set_target_properties( ${PROJ_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/exe" )
