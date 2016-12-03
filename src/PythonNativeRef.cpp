@@ -15,10 +15,7 @@ void PythonNativeRef::IncRef()
 }
 PythonNativeRef::~PythonNativeRef()
 {
-    if(m_shouldDeleteIt)
-    {
-        Py_DecRef( m_pyReference ) ;
-    }
+    Py_DecRef( m_pyReference ) ;
 }
 PyObject* PythonNativeRef::Get() const
 {

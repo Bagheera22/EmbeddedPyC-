@@ -14,7 +14,6 @@ public:
     PyObject* Get() const;
 private:
     PyObject* m_pyReference;
-    bool m_shouldDeleteIt;
 };
 
 typedef std::shared_ptr<PythonNativeRef> PythonNativeRef_ptr;
