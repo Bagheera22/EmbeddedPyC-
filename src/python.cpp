@@ -87,7 +87,13 @@ closePython()
 
 #include <iostream>
 #include <sstream>
-#include "object.hpp"
+#include <Code.h>
+#include <Module.h>
+#include <Tuple.h>
+#include <Value.h>
+#include <Dic.h>
+#include <Function.h>
+
 int main()
 {
     //PyObject a;
@@ -100,23 +106,22 @@ int main()
     stringstream buf ;
     buf << "def add( n1 , n2 ) :" << endl
     << "    return n1+n2" << endl ;
-    auto_ptr<Object> pCompiledFn( Object::compileString( buf.str().c_str() ) ) ;
-    auto_ptr<Object> pModule( Object::execCodeModule( "test" , *pCompiledFn ) ) ;
-    auto_ptr<Object> pAddFn( pModule->getAttr( "add" ) ) ;
+    Code pCompiledFn(buf.str());
+    std::unique_ptr<Module> pModule = pCompiledFn.ExecCodeModule("test");
+    
+    std::unique_ptr<Function> pAddFn = pModule->GetAttr( "add" );
     
     // prepare the function parameters
-    auto_ptr<Object> pPosArgs( Object::newTuple( 2 ) ) ;
-    Object a(2);
-    Object b(15);
-    //Object c("adas");
-    pPosArgs->setTupleItem( 0 , a ) ;
-    pPosArgs->setTupleItem( 1 , b ) ;
+    Tuple pPosArgs(2) ;
+    Value<long> a(12);
+    Value<long> b(15);
+    pPosArgs.SetItem( 0 , a ) ;
+    pPosArgs.SetItem( 1 , b ) ;
     
     // call the function
-    auto_ptr<Object> pKywdArgs( Object::newDict() ) ;
-    auto_ptr<Object> pResult( pAddFn->callObj( *pPosArgs , *pKywdArgs ) ) ;
-    
-    cout << "The answer: " << pResult->reprVal() << endl ;
+    Dic pKywdArgs;
+    std::unique_ptr<IObject> pResult = pAddFn->CallObj( pPosArgs , pKywdArgs );
+    cout << "The answer: " << pResult->ToString() << endl ;
     }
     closePython();
 }

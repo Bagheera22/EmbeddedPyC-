@@ -28,13 +28,16 @@
  */
 
 #include <sstream>
+#include <iostream>
 #include <memory>
 #include "python.h"
 
 #include "exception.hpp"
-#include "object.hpp"
-
-using namespace std ;
+#include "PyCast.h"
+#include "IObject.h"
+#include "Module.h"
+#include "Function.h"
+#include "Value.h"
 
 namespace python {
 
@@ -47,7 +50,7 @@ Exception::Exception( const char* pExceptionMsg )
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */
 
-Exception::Exception( const string& errorMsg , const string& excType , const string& excValue , const string& excTraceback )
+    Exception::Exception( const std::string& errorMsg , const std::string& excType , const std::string& excValue , const std::string& excTraceback )
     : runtime_error( errorMsg )
     , mExcType(excType) , mExcValue(excValue) , mExcTraceback(excTraceback)
 {
@@ -58,29 +61,35 @@ Exception::Exception( const string& errorMsg , const string& excType , const str
 void
 Exception::translateException()
 {
+    //PyErr_Print();
     // get the Python error details
-    string excType , excValue , excTraceback ;
+    std::string excType , excValue , excTraceback ;
     PyObject *pExcType , *pExcValue , *pExcTraceback ;
     PyErr_Fetch( &pExcType , &pExcValue , &pExcTraceback ) ;
     if ( pExcType != NULL )
     {
-        Object obj( pExcType , true ) ;
-        auto_ptr<Object> attrObj( obj.getAttr( "__name__" ) ) ;
-        excType = attrObj->reprVal() ;
+        
+        Module obj(pExcType) ;
+        std::unique_ptr<Function> attrObj = obj.GetAttr( "__name__" ) ;
+        excType = attrObj->ToString() ;
     }
     if ( pExcValue != NULL )
     {
-        Object obj( pExcValue , true ) ;
-        excValue = obj.reprVal() ;
+        std::unique_ptr<IObject> obj = PyCast<IObject>::Cast(pExcValue);
+        excValue = obj->ToString() ;
     }
     if ( pExcTraceback != NULL )
     {
-        Object obj( pExcTraceback , true ) ;
-        excTraceback = obj.reprVal() ;
+        PyObject * sysModule = PyImport_AddModule ("sys");
+        PyObject * handle = PyObject_GetAttrString (sysModule, "stderr");
+        
+        std::cout << PyTraceBack_Print(pExcTraceback,handle)<<"\n";
+        //todo
     }
-
+    PyErr_Restore(pExcType, pExcValue, pExcTraceback);
+    
     // translate the error into a C++ exception
-    stringstream buf ;
+    std::stringstream buf ;
     buf << (excType.empty() ? "???" : excType) ;
     if ( ! excValue.empty() )
         buf << ": " << excValue ;
